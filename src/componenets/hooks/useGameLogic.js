@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 
 
-export const useGameLogic = (easyCardValues) => {
+export const useGameLogic = (cardValues , difficulty) => {
     const [cards , setCards] = useState([]);
     const [flippedCards , setFlippedCards] = useState([]);
     const [matchedCards , setMatchedCards] = useState([]);
     const [moves , setMoves] = useState(0);
     const [isLocked , setIsLocked] = useState(false);
+    const [bestScore, setBestScore] = useState(null);
+    const [isNewRecord, setIsNewRecord] = useState(false);
+
 
     //Shuffle Algorithme
     const shuffleArray = (array) => {
@@ -20,7 +23,7 @@ export const useGameLogic = (easyCardValues) => {
 
     const initializeGame = () => {
     //Shuffle the Cards
-    const shuffledCards = shuffleArray(easyCardValues)
+    const shuffledCards = shuffleArray(cardValues);
 
     const finalCards = shuffledCards.map((value , index) => (
     {
@@ -39,8 +42,15 @@ export const useGameLogic = (easyCardValues) => {
     }
 
     useEffect(() => {
-        initializeGame;
-    } , []);
+        const savedBest = localStorage.getItem(`bestScore-${difficulty}`);
+        if(savedBest){
+            setBestScore(Number(savedBest));
+        } else {
+            setBestScore(null);
+        }
+
+        initializeGame();
+    } , [difficulty , cardValues]);
 
     const handleCardClick = (card) => {
     //Don't allow clicking if card is already flipped, matched
@@ -112,8 +122,22 @@ export const useGameLogic = (easyCardValues) => {
     }
     };
 
-    const isGameComplete = matchedCards.length === easyCardValues.length;
+    const isGameComplete = matchedCards.length === cardValues.length;
 
-    return {cards, moves, isGameComplete, initializeGame, handleCardClick};
+    useEffect(() => {
+        if(!isGameComplete) return;
+
+        const storageKey = `bestScore-${difficulty}`;
+
+        if(bestScore === null || moves < bestScore){
+            localStorage.setItem(storageKey , moves);
+            setBestScore(moves);
+            setIsNewRecord(true);
+        } else {
+            setIsNewRecord(false);
+        }
+    }, [isGameComplete]);
+
+    return {cards, moves, isGameComplete, bestScore, isNewRecord, initializeGame, handleCardClick};
     
 }

@@ -1,9 +1,16 @@
 
-export const WinMessage = ({moves}) => {
+export const WinMessage = ({moves, bestScore, isNewRecord }) => {
     return (
         <div className="win-message">
             <h2>Congratulations!</h2>
-            <p>You have completed the game in {moves} moves!</p>
+            {isNewRecord ? (
+            <p>🏆 New Best score! You finished in {moves} moves.</p>
+            ) : (
+            <p>
+                You finished in {moves} moves. Best score: {bestScore}
+            </p>
+            )}
+
         </div>
     )
 }
